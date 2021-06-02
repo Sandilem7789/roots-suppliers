@@ -26,15 +26,15 @@ async function main() {
         //Now let's interact with the database
         await listDatabases(client);
 
-        //Crud: insertOne
-        await createListing(client, {
+        //CRUD(Create): insertOne
+         /*await createListing(client, {
             name: "Lovely Loft",
             summary: "A lovely loft in the iNanda Area",
             bedrooms: 3,
             bathrooms: 3
         })
 
-        //Crud: insertMany
+        //CRUD(Create): insertMany
         await createMultipleListings(client, [
             {
                 name: "Infinite Views",
@@ -58,7 +58,10 @@ async function main() {
                 beds: 7,
                 last_review: new Date()
             }
-        ]);
+        ]);*/
+
+        //CRUD(Read): findOne method
+        await findOneListingByName(client, "Lovely Loft");
 
     } catch (e) {
         console.error(e);
@@ -82,17 +85,30 @@ async function listDatabases(client){
 
 /**CRUD OPERATIONS**/
 
-//CREATE 
-//insertOne method
+//CREATE: insertOne method
 async function createListing(client, newListing) {
     const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertOne(newListing);
     console.log(`New Listing created with the following _id: ${result.insertedId}`);
 }
 
-//insertMany method
+//CREATE: insertMany method
 async function createMultipleListings(client, newListings){
     const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertMany(newListings);
 
     console.log(`${result.insertedCount} new listing(s) created, created with the following id(s):`);
     console.log(result.insertedIds);
+}
+
+//-----------------------------------------------------------------------------------------------------------
+//READ: findOne method
+
+async function findOneListingByName(client, nameOfListing){
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").findOne({ name: nameOfListing });
+
+    if(result){
+        console.log(`Found listing with the name '${nameOfListing}'`);
+        console.log(result);
+    } else {
+        console.log(`No listing found with the name '${nameOfListing}'`);
+    }
 }
