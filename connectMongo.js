@@ -25,6 +25,41 @@ async function main() {
 
         //Now let's interact with the database
         await listDatabases(client);
+
+        //Crud: insertOne
+        await createListing(client, {
+            name: "Lovely Loft",
+            summary: "A lovely loft in the iNanda Area",
+            bedrooms: 3,
+            bathrooms: 3
+        })
+
+        //Crud: insertMany
+        await createMultipleListings(client, [
+            {
+                name: "Infinite Views",
+                summary: "Modern home with infinite views from the infinity pool",
+                property_type: "House",
+                bedrooms: 5,
+                bathrooms: 4.5,
+                beds: 5
+            },
+            {
+                name: "Private room in London",
+                property_type: "Apartment",
+                bedrooms: 1,
+                bathroom: 1
+            },
+            {
+                name: "Beautiful Beach House",
+                summary: "Enjoy relaxed beach living in this house with a private beach",
+                bedrooms: 4,
+                bathrooms: 2.5,
+                beds: 7,
+                last_review: new Date()
+            }
+        ]);
+
     } catch (e) {
         console.error(e);
     }
@@ -38,9 +73,26 @@ async function main() {
 main().catch(console.error)
 
 //list databases function: retrieving the list of databses
-async function listDatabases(client) {
+async function listDatabases(client){
     databasesList = await client.db().admin().listDatabases();
 
     console.log("Databases: ");
-    databasesList.databases.forEach(db => console.log(` - ${db.name}`))
+    databasesList.databases.forEach(db => console.log(` - ${db.name}`));
+}
+
+/**CRUD OPERATIONS**/
+
+//CREATE 
+//insertOne method
+async function createListing(client, newListing) {
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertOne(newListing);
+    console.log(`New Listing created with the following _id: ${result.insertedId}`);
+}
+
+//insertMany method
+async function createMultipleListings(client, newListings){
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertMany(newListings);
+
+    console.log(`${result.insertedCount} new listing(s) created, created with the following id(s):`);
+    console.log(result.insertedIds);
 }
