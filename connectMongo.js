@@ -17,6 +17,7 @@ async function main() {
     const uri = "mongodb+srv://sandile:sandilem7789@testcluster.hjbaj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+
     //functions that will interact with the database, wrapped in a try catch block.
     try{
         //using the MongoClient to connect to our cluster
@@ -60,8 +61,15 @@ async function main() {
             }
         ]);*/
 
-        //CRUD(Read): findOne method
+        //CRUD(Read): findOne() method, finding one document
         await findOneListingByName(client, "Lovely Loft");
+
+        await findMinBedsAndMinBaths(client, {
+            minimumNumberOfBedrooms: 3,
+            minimumNumberOfBathrooms: 3.0,
+            maximumNumberOfResults: 8
+        })
+        
 
     } catch (e) {
         console.error(e);
@@ -110,5 +118,41 @@ async function findOneListingByName(client, nameOfListing){
         console.log(result);
     } else {
         console.log(`No listing found with the name '${nameOfListing}'`);
+    }
+}
+
+async function findMinBedsAndMinBaths(client, {
+    minimumNumberOfBedrooms = 0,
+    minimumNumberOfBathrooms = 0,
+    maximumNumberOfResults = Number.MAX_SAFE_INTEGER
+} = {}) {
+    //CRUD(Read): finding more than one document we use the find() method
+    //the results are sorted in decending order
+    //the limit method limits the number of records we are going to return
+    const cursor = client.db("sample_airbnb").collection("listingsAndReviews").find(
+        {
+            bedrooms: { $gte: minimumNumberOfBedrooms },
+            bathrooms: { $gte: minimumNumberOfBathrooms }
+        }
+    ).limit(maximumNumberOfResults);
+    
+    //returnung the results as an array
+    const results = await cursor.toArray();
+    console.log(results.length);
+
+    if(results.length > 0) {
+        console.log(`Found listing(s) with at least ${minimumNumberOfBedrooms} bedrooms and ${minimumNumberOfBathrooms} bathrooms`);
+        results.forEach((result, i) => {
+            date = new Date(result.last_review).toDateString();
+
+            console.log();
+            console.log(`${i + 1}. name: ${result.name}`);
+            console.log(`   _id: ${result._id}`);
+            console.log(`   bedrooms: ${result.bedrooms}`);
+            console.log(`   bathrooms: ${result.bathrooms}`);
+            //console.log(`   most recent review date: ${new Date(result.last_review).toDateString()}`);
+        });
+    } else {
+        console.log(`No listings found with atleast ${minimumNumberOfBedrooms} bedrooms and ${minimumNumberOfBathrooms} bathrooms`);
     }
 }
