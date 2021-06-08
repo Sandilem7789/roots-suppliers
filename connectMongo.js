@@ -62,6 +62,7 @@ async function main() {
         ]);*/
 
         //CRUD(Read): findOne() method, finding one document
+        /*
         await findOneListingByName(client, "Lovely Loft");
 
         await findMinBedsAndMinBaths(client, {
@@ -71,7 +72,10 @@ async function main() {
         })
 
         //CRUD: Update, usign the updateOne method
-        await updateListingByName(client, "Lovely Loft", {bedrooms: 6, beds: 8});
+        await updateListingByName(client, "Lovely Lofts", {bedrooms: 16, beds: 8});
+        */
+        //CRUD: Update many
+        await upadateAllListingToHavePropertyType(client);
         
 
     } catch (e) {
@@ -162,11 +166,43 @@ async function findMinBedsAndMinBaths(client, {
 }
 
 //UPDATE 
-async function updateListingByName(client, nameOfListing, updateListing){
+/*async function updateListingByName(client, nameOfListing, updateListing){
     const result = await client
         .db("sample_airbnb").collection("listingsAndReviews")
-        .updateOne({ name: nameOfListing }, {$set: updateListing});
+        .updateOne({ name: nameOfListing }, { $set: updateListing });
 
         console.log(`${result.matchedCount} document(s) matched the query criteria.`);
         console.log(`${result.modifiedCount} document(s) was/were updated`);
+}*/
+
+//UPSERT: Update if it exist if it doesnt insert, UPDATE + INSERT
+async function updateListingByName(client, nameOfListing, updateListing){
+    const result = await client
+        .db("sample_airbnb").collection("listingsAndReviews")
+        .updateOne(
+            { name: nameOfListing },
+            { $set: updateListing },
+            { upsert: true }
+        );
+        console.log(`${result.matchedCount} document(s) matched the criteria.`);
+
+        if(result.upsertedCount > 0){
+            console.log(`One document was inserted with the id: ${result.upsertedId._id}`);
+        } else {
+            console.log(`${result.modifiedCount} document(s) was/were updated`);
+        }
+
+        console.log(`${result.matchedCount} document(s) matched the query criteria.`);
+        console.log(`${result.modifiedCount} document(s) was/were updated`);
+}
+
+//Updating Multiple Documents: Insterting field names on multiple documents
+async function upadateAllListingToHavePropertyType(client){
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews")
+                .updateMany(
+                    { property_type: { $exists: false } },
+                    { $set: { property_type: "Unknown" } }    
+                );
+    console.log(`${result.matchedCount} document(s) matched the query criteria.`);
+    console.log(`${result.matchedCount} document(s) was/were updated.`);
 }
