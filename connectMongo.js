@@ -76,8 +76,13 @@ async function main() {
         */
         //CRUD: Update many
         await upadateAllListingToHavePropertyType(client);
-        
 
+        //CRUD: deleteOne()
+        await deleteListByName(client, "Lovely Loft");
+
+        //CRUD: deleteMany()
+        await deleteListingsScrapedBeforeDate(client, new Date("2019-02-15"))
+        
     } catch (e) {
         console.error(e);
     }
@@ -205,4 +210,16 @@ async function upadateAllListingToHavePropertyType(client){
                 );
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.matchedCount} document(s) was/were updated.`);
+}
+
+//Delete: deleteOne() method will delete the first documents it finds and only that document
+async function deleteListByName(client, nameOfListing) {
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").deleteOne({name: nameOfListing});
+    console.log(`${result.deletedCount} document(s) were/was deleted.`);
+}
+
+//Delete: deleteMany() method can be used with a date filter
+async function deleteListingsScrapedBeforeDate(client, date){
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").deleteMany({"last_scraped": {$lt: date}});
+    console.log(`${result.deletedCount} document(s) was/were deleted.`);
 }
