@@ -89,6 +89,12 @@
          await deleteListing(client, italianVilla);
          await deleteListing(client, beautifulBeachHouse);
          await deleteListing(client, privateRoomInLondon);
+
+         //deleting Listings
+         await deleteManyListings(client, "Opera House Views");
+         await deleteManyListings(client, "Sydney Harbour Home");
+         await deleteManyListings(client, "Italian Villa");
+         await deleteManyListings(client, "Beautiful Beach House");
  
      } finally {
          // Close the connection to the MongoDB cluster
@@ -136,3 +142,10 @@
  
      console.log(`${result.deletedCount} document(s) was/were deleted.`);
  }
+
+ //I duplicate Dcuments now I need to delete all of them
+ //Delete: deleteMany() method can be used with a date filter
+async function deleteManyListings(client, listingName){
+    const result = await client.db("sample_airbnb").collection("listingsAndReviews").deleteMany({"name": {$eq: listingName}});
+    console.log(`${result.deletedCount} document(s) was/were deleted.`);
+}

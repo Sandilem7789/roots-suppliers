@@ -31,6 +31,7 @@ async function main() {
                     "fullDocument.address.country": "Australia",
                     "fullDocument.address.market": "Sydney"
                 }
+
             }
         ]
 
