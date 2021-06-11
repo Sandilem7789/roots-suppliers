@@ -22,7 +22,20 @@ async function main() {
         await client.connect();
 
         // Make the appropriate DB calls
-        await monitorListingsUsingEventEmitter(client);
+
+        //we can call the monitor function with an aggregation timeline
+        const pipeline = [
+            {
+                "$match": {
+                    "operationType": "insert",
+                    "fullDocument.address.country": "Australia",
+                    "fullDocument.address.market": "Sydney"
+                }
+            }
+        ]
+
+        //calling the function to monitor streams using the event emitter on() function
+        await monitorListingsUsingEventEmitter(client, 30000, pipeline);
 
     } finally {
         // Close the connection to the MongoDB cluster
@@ -60,3 +73,5 @@ let monitorListingsUsingEventEmitter = async (client, timeInMs = 60000, pipeline
     //we could live the stream open indefinetely, but we are going to close it.
     await closeChangeStream(timeInMs, changeStream);
 }
+
+//There is another way to monitor change, we can alternatively use ChangeStream hasNext() function
